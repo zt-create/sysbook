@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>借阅记录管理</title>
+    <style>
+        /* 全局样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+        }
+
+        /* 导航栏样式 */
+        .nav {
+            height: 60px;
+            background-color: #2c3e50;
+            padding: 0 40px;
+            line-height: 60px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .nav-logo {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        /* 通用按钮样式 */
+        button {
+            height: 38px;
+            padding: 0 18px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 0 6px;
+            transition: opacity 0.3s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* 容器样式 */
+        .container {
+            width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        /* 标题样式 */
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            border: 1px solid #ebeef5;
+            padding: 14px 10px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        /* 表头样式 */
+        th {
+            background-color: #409EFF;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        /* 表格行hover高亮 */
+        tbody tr:hover {
+            background-color: #f2f7ff;
+        }
+
+        /* 按钮通用样式 */
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            margin: 0 4px;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            opacity: 0.85;
+        }
+
+        /* 编辑按钮 */
+        .btn-edit {
+            background-color: #67C23A;
+            color: #fff;
+        }
+
+        /* 删除按钮 */
+        .btn-del {
+            background-color: #F56C6C;
+            color: #fff;
+        }
+
+        /* 借阅按钮 */
+        .btn-borrow {
+            background-color: #E6A23C;
+            color: #fff;
+        }
+
+        /* 归还按钮 */
+        .btn-return {
+            background-color: #409EFF;
+            color: #fff;
+        }
+
+        /* 已归还状态文字样式 */
+        .status-back {
+            color: #67C23A;
+            font-weight: 500;
+        }
+
+        /* 未归还状态文字样式 */
+        .status-no {
+            color: #F56C6C;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+<div class="nav">
+    <a class="nav-logo" href="#">校园图书借阅管理系统</a>&nbsp;&nbsp;&nbsp;
+    <button onclick="location.href='index.html'" style="float: right;margin-top: 10px;">返回首页</button>
+</div>
+<div class="container">
+    <h2>我的图书借阅记录管理</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>用户ID</th>
+            <th>图书ID</th>
+            <th>借阅时间</th>
+            <th>返还时间</th>
+            <th>借阅状态</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody id="tbody">
+        </tbody>
+    </table>
+    <script src="webjars/jquery/3.6.0/jquery.js"></script>
+    <script>
+        let loginUser = null;
+        $(function () {
+            let userStr = localStorage.getItem("userInfo");
+            if (!userStr) {
+                window.location.href = "login.html";
+                return;
+            }
+            loginUser = JSON.parse(userStr);
+            getBorrow();
+        });
+
+        function getBorrow(){
+            $.ajax({
+                url:"/borrow/list",
+                type:"GET",
+                success: function (res) {
+                    if (res.code === 200) {
+                        let html = "";
+                        // 过滤：只展示当前登录用户的借阅数据
+                        let myBorrowList = res.data.filter(item => item.userId === loginUser.id);
+                        $.each(myBorrowList, function (index, item) {
+                            let btnHtml = item.status !== '已归还'
+                                ? `<button class="btn btn-return" data-id="${item.id}">归还</button>`
+                                : '';
+                            html += `
+                                <tr>
+                                    <td>${item.id}</td>
+                                    <td>${item.userId}</td>
+                                    <td>${item.bookId}</td>
+                                    <td>${item.borrowTime}</td>
+                                    <td>${item.returnTime || '未归还'}</td>
+                                    <td class="${item.status == '已归还' ? 'status-back' : 'status-no'}">${item.status}</td>
+                                    <td>
+                                        ${btnHtml}
+                                    </td>
+                                </tr>`;
+                        });
+                        $("#tbody").html(html);
+                        bindTableBtn();
+                    }
+                },
+                error: function () {
+                    alert("网络连接失败，无法加载借阅数据")
+                }
+            });
+        };
+
+        function bindTableBtn(){
+            $(".btn-return").click(function () {
+                let userStr = localStorage.getItem("userInfo");
+                if (!userStr){
+                    alert("登录失效，请重新登陆");
+                    window.location.href="login.html";
+                    return;
+                }
+                let borrowId = $(this).data("id");
+                $.ajax({
+                    url: "/borrow/back/"+borrowId,
+                    type: "POST",
+                    success:function (res){
+                        if (res.code===200){
+                            alert("归还成功");
+                            getBorrow();
+                        } else {
+                            alert(res.msg);
+                        }
+                    },
+                    error:function(){
+                        alert("归还请求失败");
+                    }
+                })
+            });
+        };
+    </script>
+</div>
+</body>
+</html>

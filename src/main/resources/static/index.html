@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>系统首页</title>
+    <style>
+        *{margin: 0;padding: 0;list-style: none;text-decoration: none;}
+        .nav{height: 60px;background: #222;line-height: 60px;padding: 0 50px;}
+        .nav-logo{color: #fff;font-size: 20px;font-weight: bold;}
+        .nav-list{display: inline-block;margin-left: 50px;}
+        .nav-list li{display: inline-block;margin: 0 20px;}
+        .nav-list li a{color: #ccc;}
+        .nav-list li a:hover{color: #fff;}
+        .nav-user{float: right;color: #ccc;}
+        .logout{margin-left: 20px;padding: 6px 12px;background: #555;color: #fff;border-radius: 4px;cursor: pointer;}
+        .container{margin-top: 80px;text-align: center;}
+        .container h2{color: #333;margin-bottom: 20px;}
+        .container p{color: #666;}
+    </style>
+</head>
+<body>
+
+    <div class="nav">
+        <a class="nav-logo" href="#">校园图书借阅管理系统</a>
+        <ul class="nav-list">
+            <li><a href="bookList.html">图书管理</a></li>
+            <li><a href="borrowList.html">借阅记录</a></li>
+        </ul>
+        <div class="nav-user">
+            <span id="showUser"></span>
+            <span class="logout" id="logout">退出登录</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>欢迎使用校园图书借阅管理系统</h2>
+        <p>SpringBoot实训项目 · 前后端完整可运行案例</p>
+    </div>
+<script src="webjars/jquery/3.6.0/jquery.js"></script>
+<script>
+    $(function (){
+        let userStr=localStorage.getItem("userInfo");
+        if (!userStr){
+            window.location.href="login.html";
+        }
+        else {
+            let userInfo = JSON.parse(userStr);
+            $("#showUser").text("欢迎您"+userInfo.username);
+        }
+        $("#logout").click(
+            function (){
+                localStorage.removeItem("userInfo");
+                window.location.href="login.html"
+                alert("退出成功")
+            }
+        )
+    })
+</script>
+
+</body>
+</html>

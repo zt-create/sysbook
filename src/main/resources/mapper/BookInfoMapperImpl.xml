@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.org.example.mapper.BookInfoMapper">
+
+    <!-- 根据图书名查询图书信息 -->
+    <select id="list"  resultType="BookInfo">
+        select *
+        from book_info
+        <where>
+            deleted = 0
+            <if test="bookName != null and bookName != ''">
+                and book_name like concat('%', #{bookName}, '%')
+            </if>
+        </where>
+    </select>
+
+    <!-- 根据id查询 -->
+    <select id="getById" resultType="BookInfo">
+        select * from book_info where id = #{id} and deleted = 0
+    </select>
+
+    <!-- 添加图书信息 -->
+    <insert id="add" parameterType="BookInfo" useGeneratedKeys="true" keyProperty="id">
+        insert into book_info (book_name, author, category, publish_house, stock, book_desc, deleted)
+        values (#{bookName}, #{author}, #{category}, #{publishHouse}, #{stock}, #{bookDesc}, 0)
+    </insert>
+
+    <!-- 修改图书信息 -->
+    <update id="update" parameterType="BookInfo">
+        update book_info
+        <set>
+            book_name = #{bookName},
+            author = #{author},
+            category = #{category},
+            publish_house = #{publishHouse},
+            stock = #{stock},
+            book_desc = #{bookDesc}
+        </set>
+        where id = #{id}
+    </update>
+
+    <!-- 逻辑删除图书 -->
+    <update id="delete">
+        update book_info set deleted = 1 where id = #{id}
+    </update>
+
+    <!-- 更新库存 -->
+    <update id="updateStock" parameterType="BookInfo">
+        update book_info set stock = #{stock} where id = #{id}
+    </update>
+
+</mapper>

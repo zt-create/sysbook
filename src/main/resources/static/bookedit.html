@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>图书编辑</title>
+    <style>
+        .box {
+            width: 500px;
+            margin: 50px auto
+        }
+
+        input, textarea {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 30px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover{
+            background: #0056b3;
+        }
+        /* 导航栏样式 */
+        .nav {
+            height: 60px;
+            background-color: #2c3e50;
+            padding: 0 40px;
+            line-height: 60px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .nav-logo {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<div class="nav">
+    <a class="nav-logo" href="#">校园图书借阅管理系统</a>
+    <button onclick="location.href='bookList.html'" style="float: right;margin-top: 10px;">返回</button>
+</div>
+<div class="box">
+    <h2>图书编辑</h2>
+    <input id="bookName" placeholder="书名">
+    <input id="author" placeholder="作者">
+    <input id="category" placeholder="分类">
+    <input id="publishHouse" placeholder="出版社">
+    <input id="stock" placeholder="库存">
+    <textarea id="bookDesc" placeholder="简介" rows="3"></textarea>
+    <button id="btnSave">保存</button>
+</div>
+
+</body>
+<script src="webjars/jquery/3.6.0/jquery.js"></script>
+<script>
+    let id = new URLSearchParams(location.search).get('id');
+
+    $(function () {
+        if (id) {
+            $.ajax({
+                url: "/book/get/" + id,
+                type: "GET",
+                success: function (res) {
+                    let info = res.data;
+                    $("#bookName").val(info.bookName);
+                    $("#author").val(info.author);
+                    $("#category").val(info.category);
+                    $("#publishHouse").val(info.publishHouse);
+                    $("#stock").val(info.stock);
+                    $("#bookDesc").val(info.bookDesc);
+                },
+                error: function () {
+                    alert("回显数据加载失败，请检查后端查询接口");
+                }
+            });
+        }
+
+        $("#btnSave").click(function () {
+            let reqUrl = id ? "/book/update" : "/book/add";
+            let reqMethod = id ? "PUT" : "POST";
+            let submitData = {
+                id: id ? Number(id) : null,
+                bookName: $("#bookName").val().trim(),
+                author: $("#author").val().trim(),
+                category: $("#category").val().trim(),
+                publishHouse: $("#publishHouse").val().trim(),
+                stock: Number($("#stock").val()),
+                bookDesc: $("#bookDesc").val().trim()
+            };
+
+            $.ajax({
+                url: reqUrl,
+                type: reqMethod,
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify(submitData),
+                success: function (res) {
+                    alert(id ? "修改成功！" : "新增成功！");
+                    window.location.href = "bookList.html";
+                },
+                error: function (xhr) {
+                    console.log(xhr);
+                    alert("操作失败：" + xhr.responseText);
+                }
+            });
+        });
+    });
+</script>
+</html>
