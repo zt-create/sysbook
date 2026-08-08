@@ -461,3 +461,4 @@ http://localhost:8080/login.html
 | webjars | 以 jar 形式打包前端依赖（如 jQuery），通过 `/webjars/...` 路径访问 |
 | `Result<T>` | 本项目统一的 HTTP 响应封装结构 |
 | `@MapperScan` | 本项目未使用，改为在每个 Mapper 接口上标注 `@Mapper` 实现扫描 |
+
